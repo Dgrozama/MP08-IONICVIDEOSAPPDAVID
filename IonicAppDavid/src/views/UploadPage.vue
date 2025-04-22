@@ -2,9 +2,8 @@
   <ion-page>
     <Navbar title="Pujar un fitxer" />
 
-    <ion-content>
-      <div class="filepond-container">
-        <!-- Inicialitzar FilePond amb la configuració del servidor -->
+    <ion-content class="upload-content">
+      <div class="upload-container">
         <FilePond
             name="file"
             allow-multiple="true"
@@ -23,26 +22,19 @@ import 'filepond/dist/filepond.min.css';
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css';
 
-import { ref, onMounted,  } from 'vue';
+import { ref, onMounted } from 'vue';
 import Navbar from '../components/Navbar.vue';
 import Footer from '../components/Footer.vue';
 
 const FilePond = vueFilePond(FilePondPluginImagePreview);
 
-// Definir una referència per al token
 const token = ref(null);
-
-// Definir la configuració de FilePond
 const filePondServerConfig = ref({});
 
-// Obtenir el token del localStorage després de muntar el component
 onMounted(() => {
-  // Obtenim el token del localStorage al muntar el component
   token.value = localStorage.getItem('token');
 
-  // Comprovem si el token està disponible i configurem FilePond
   if (token.value) {
-    // Actualitzar la configuració de FilePond amb el token
     filePondServerConfig.value = {
       process: {
         url: 'http://127.0.0.1:8000/api/multimedia',
@@ -51,15 +43,14 @@ onMounted(() => {
           'Authorization': `Bearer ${token.value}`,
         }
       },
-      revert: 'http://127.0.0.1:8000/api/multimedia/revert',  // Si vols revertir la pujada
-      fetch: 'http://127.0.0.1:8000/api/multimedia/fetch'  // Si necessites obtenir fitxers existents
+      revert: 'http://127.0.0.1:8000/api/multimedia/revert',
+      fetch: 'http://127.0.0.1:8000/api/multimedia/fetch'
     };
   } else {
     console.error('No s\'ha trobat el token. Assegura\'t que estiguis autenticat.');
   }
 });
 
-// Funció per capturar el fitxer seleccionat
 const onFileProcess = (error, file) => {
   if (error) {
     console.error('Error en el procés del fitxer:', error);
@@ -70,8 +61,40 @@ const onFileProcess = (error, file) => {
 </script>
 
 <style scoped>
-.filepond-container {
-  margin-top: 20px;
+.upload-content {
+  --background: linear-gradient(135deg, #e0f7fa, #80deea);
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.upload-container {
+  margin-top: 30px;
   width: 100%;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.upload-container:hover {
+  transform: scale(1.02);
+  box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.filepond--wrapper {
+  margin-top: 20px;
+}
+
+@media (max-width: 767px) {
+  .upload-container {
+    padding: 20px;
+  }
 }
 </style>

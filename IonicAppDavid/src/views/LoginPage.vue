@@ -1,45 +1,53 @@
 <template>
   <ion-page>
-    <Navbar title="Accedeix al teu compte"/>
-    <ion-content :fullscreen="true">
-      <ion-card v-if="!isLoggedIn" class="auth-card">
-        <ion-card-header>
-          <ion-card-title>{{ isRegister ? 'Crear un compte' : 'Inicia sessió al teu compte' }}</ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <ion-item>
-            <ion-label position="floating">Nom</ion-label>
-            <ion-input v-model="form.name" v-if="isRegister" placeholder="Introdueix el teu nom complet" />
-          </ion-item>
-          <ion-item>
-            <ion-label position="floating">Correu electrònic</ion-label>
-            <ion-input v-model="form.email" type="email" placeholder="Introdueix el teu correu electrònic" />
-          </ion-item>
-          <ion-item>
-            <ion-label position="floating">Contrasenya</ion-label>
-            <ion-input v-model="form.password" type="password" placeholder="Tria una contrasenya segura" />
-          </ion-item>
-          <!-- Campo per Confirmar Contrasenya -->
-          <ion-item v-if="isRegister">
-            <ion-label position="floating">Confirmar contrasenya</ion-label>
-            <ion-input v-model="form.confirmPassword" type="password" placeholder="Confirma la teva contrasenya" />
-          </ion-item>
-          <ion-button expand="block" @click="submit" class="action-btn">
-            {{ isRegister ? 'Registrar-se' : 'Iniciar sessió' }}
-          </ion-button>
-          <ion-button expand="block" fill="clear" @click="isRegister = !isRegister" class="switch-btn">
-            {{ isRegister ? 'Vés a Iniciar Sessió' : 'Vés a Registrar-se' }}
-          </ion-button>
-        </ion-card-content>
-      </ion-card>
-      <Footer/>
+    <Navbar title="Benvingut!" />
+    <ion-content :fullscreen="true" class="auth-content">
+      <div class="auth-container">
+        <h1 class="auth-title">{{ isRegister ? 'Crea el teu compte' : 'Inicia sessió' }}</h1>
+        <p class="auth-subtitle">
+          {{ isRegister ? 'Uneix-te a nosaltres avui mateix!' : 'Accedeix al teu compte per continuar.' }}
+        </p>
+
+        <ion-card class="auth-card">
+          <ion-card-content class="card-content">
+            <ion-item class="form-item" v-if="isRegister">
+              <ion-label position="floating">Nom</ion-label>
+              <ion-input v-model="form.name" placeholder="Introdueix el teu nom complet" />
+            </ion-item>
+
+            <ion-item class="form-item">
+              <ion-label position="floating">Correu electrònic</ion-label>
+              <ion-input v-model="form.email" type="email" placeholder="Introdueix el teu correu electrònic" />
+            </ion-item>
+
+            <ion-item class="form-item">
+              <ion-label position="floating">Contrasenya</ion-label>
+              <ion-input v-model="form.password" type="password" placeholder="Tria una contrasenya segura" />
+            </ion-item>
+
+            <ion-item class="form-item" v-if="isRegister">
+              <ion-label position="floating">Confirmar contrasenya</ion-label>
+              <ion-input v-model="form.confirmPassword" type="password" placeholder="Confirma la teva contrasenya" />
+            </ion-item>
+
+            <ion-button expand="block" @click="submit" class="btn-primary">
+              {{ isRegister ? 'Registrar-se' : 'Iniciar sessió' }}
+            </ion-button>
+
+            <ion-button expand="block" fill="clear" @click="isRegister = !isRegister" class="btn-secondary">
+              {{ isRegister ? 'Ja tens un compte? Inicia sessió' : 'No tens un compte? Registra\'t' }}
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      </div>
+      <Footer />
     </ion-content>
   </ion-page>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
-import { IonPage, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput, IonButton } from '@ionic/vue';
+import { IonPage, IonContent, IonCard, IonCardContent, IonItem, IonLabel, IonInput, IonButton } from '@ionic/vue';
 import api from '../services/api';
 import { useRouter } from 'vue-router';
 import Navbar from "@/components/Navbar.vue";
@@ -53,8 +61,6 @@ export default defineComponent({
     IonPage,
     IonContent,
     IonCard,
-    IonCardHeader,
-    IonCardTitle,
     IonCardContent,
     IonItem,
     IonLabel,
@@ -67,7 +73,6 @@ export default defineComponent({
     const isLoggedIn = ref(!!localStorage.getItem('token'));
     const form = ref({ name: '', email: '', password: '', confirmPassword: '' });
 
-    // Redirigir a la pàgina de /user si l'usuari ja està autenticat
     onMounted(() => {
       if (isLoggedIn.value) {
         router.push('/user');
@@ -76,7 +81,6 @@ export default defineComponent({
 
     const submit = async () => {
       try {
-        // Validació del frontend
         if (isRegister.value) {
           if (!form.value.name.trim()) {
             alert('Si us plau, introdueix un nom.');
@@ -100,9 +104,6 @@ export default defineComponent({
           ...(isRegister.value && { name: form.value.name })
         };
 
-        // Debug payload
-        console.log('Enviant dades:', payload);
-
         const response = await api.post(endpoint, payload);
         localStorage.setItem('token', response.data.token);
         isLoggedIn.value = true;
@@ -113,82 +114,84 @@ export default defineComponent({
       }
     };
 
-    const logout = () => {
-      localStorage.removeItem('token');
-      isLoggedIn.value = false;
-      router.push('/login');
-    };
-
-    return { isRegister, isLoggedIn, form, submit, logout };
+    return { isRegister, isLoggedIn, form, submit };
   }
 });
 </script>
 
 <style scoped>
-ion-content {
-  --background: #f4f7f6;
+.auth-content {
+  --background: linear-gradient(135deg, #6366f1, #4f46e5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  min-height: 100vh;
+}
+
+.auth-container {
+  text-align: center;
+  color: white;
+}
+
+.auth-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
 }
 
 .auth-card {
-  margin: 20px;
-  padding: 20px;
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.btn-primary {
+  --background: #4f46e5;
+  --color: white;
+  font-weight: 600;
+  font-size: 1rem;
   border-radius: 12px;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
-  background-color: white;
-}
-
-ion-card-header {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-ion-card-title {
-  font-size: 22px;
-  font-weight: 600;
-  color: #333;
-}
-
-ion-button {
-  margin-top: 15px;
-  border-radius: 10px;
-  background: #3498db;
-  color: white;
-  font-weight: bold;
+  padding: 0.75rem;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
   transition: background 0.3s ease;
-  box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
 }
 
-ion-button:hover {
-  background: #2980b9;
+.btn-primary:hover {
+  --background: #3b3abf;
 }
 
-.switch-btn {
-  color: white !important; /* Assegura que el text sigui blanc */
-  font-weight: 600;
+.btn-secondary {
+  --color: #4f46e5;
+  font-weight: 500;
+  font-size: 0.95rem;
   text-align: center;
+  margin-top: 0.5rem;
 }
 
-ion-item {
-  margin-bottom: 15px;
+.form-item {
+  margin-bottom: 1.5rem; /* Augmenta l'espai entre els camps */
 }
 
 ion-label {
-  color: #333;
-}
-
-ion-input {
-  border-radius: 10px;
-  background-color: #f4f7f6;
-  padding: 10px;
-  font-size: 16px;
-}
-
-ion-input::part(input) {
-  padding: 12px;
-}
-
-footer {
-  margin-top: 40px;
-  text-align: center;
+  padding-top: 15px;
+  margin-bottom: 15px; /* Espai entre el label i l'input */
+  display: block; /* Assegura que el label estigui separat de l'input */
 }
 </style>

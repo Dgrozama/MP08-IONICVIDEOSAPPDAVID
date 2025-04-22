@@ -1,34 +1,39 @@
 <template>
   <ion-page>
-    <Navbar title="Llista d'Arxius"/>
+    <Navbar title="Llista d'Arxius" />
 
-    <ion-content>
+    <ion-content class="media-content">
       <!-- Botó flotant per pujar un fitxer -->
-      <ion-button
-          expand="full"
-          class="upload-button"
-          @click="goToUploadPage">
-        <img src="@/assets/add.png" alt="Pujar un fitxer" class="upload-icon" />
+      <ion-button expand="full" class="btn-upload" @click="goToUploadPage">
+        <img src="@/assets/add.png" alt="Pujar un fitxer" class="btn-upload-icon" />
       </ion-button>
 
       <!-- Llista d'arxius multimèdia en mode grid -->
-      <ion-grid>
+      <ion-grid class="media-grid">
         <ion-row>
-          <ion-col size="6" size-sm="4" size-md="3" v-for="(item, index) in multimedia" :key="index">
+          <ion-col
+              size="6"
+              size-sm="4"
+              size-md="3"
+              v-for="(item, index) in multimedia"
+              :key="index"
+          >
             <ion-card class="media-card">
-              <ion-card-header>
+              <ion-card-header class="media-header">
                 <img :src="getPreviewSrc(item)" alt="Previsualització" />
               </ion-card-header>
 
-              <!-- Imatge de l'usuari en un cercle i el seu nom -->
-              <ion-card-footer>
-                <ion-item lines="none">
+              <ion-card-footer class="media-footer">
+                <ion-item lines="none" class="media-user">
                   <ion-avatar slot="start">
                     <img :src="item.user.profile_photo_url" />
                   </ion-avatar>
-                  <ion-label>{{ item.user.name }}</ion-label>
+                  <ion-label class="media-username">
+                    {{ item.user.name }}
+                  </ion-label>
                 </ion-item>
-                <ion-item>
+
+                <ion-item lines="none" class="media-date">
                   <ion-label>
                     <p>{{ formatDate(item.created_at) }} - Fa {{ getTimeAgo(item.created_at) }}</p>
                   </ion-label>
@@ -39,7 +44,7 @@
         </ion-row>
       </ion-grid>
 
-      <Footer/>
+      <Footer />
     </ion-content>
   </ion-page>
 </template>
@@ -47,38 +52,13 @@
 <script setup>
 import Navbar from '../components/Navbar.vue';
 import Footer from '../components/Footer.vue';
-import {ref, onMounted} from 'vue';
-import {useRouter} from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import api from '../services/api';
-
-// Funció per formatar la data
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  return date.toLocaleString(); // Potser vulguis personalitzar més el format
-};
-
-// Funció per mostrar "Fa X hores" o altres unitats de temps
-const getTimeAgo = (dateString) => {
-  const now = new Date();
-  const diffInSeconds = Math.floor((now - new Date(dateString)) / 1000);
-
-  const minutes = Math.floor(diffInSeconds / 60);
-  const hours = Math.floor(diffInSeconds / 3600);
-  const days = Math.floor(diffInSeconds / 86400);
-
-  if (hours < 1) {
-    return `${minutes} minut${minutes === 1 ? '' : 's'}`;
-  } else if (hours < 24) {
-    return `${hours} hora${hours === 1 ? '' : 's'}`;
-  } else {
-    return `${days} dia${days === 1 ? '' : 's'}`;
-  }
-};
 
 const router = useRouter();
 const multimedia = ref([]);
 
-// Funció per obtenir els arxius multimèdia
 const getMultimedia = async () => {
   try {
     const response = await api.get('/multimedia');
@@ -88,17 +68,15 @@ const getMultimedia = async () => {
   }
 };
 
-// Funció per redirigir a la pàgina de pujada
 const goToUploadPage = () => {
   router.push('/upload').then(() => {
-    window.location.reload();  // Forçar recàrrega
+    window.location.reload();
   });
 };
 
 import videoIcon from '@/assets/video.png';
 import documentIcon from '@/assets/docs.png';
 const getPreviewSrc = (item) => {
-  console.log(item);
   if (item.file_type.startsWith('image/')) {
     return `data:image/jpeg;base64,${item.file_path}`;
   } else if (item.file_type.startsWith('video/')) {
@@ -108,103 +86,123 @@ const getPreviewSrc = (item) => {
   }
 };
 
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleString();
+};
 
-// Carregar la llista d'arxius en muntar la pàgina
+const getTimeAgo = (dateString) => {
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - new Date(dateString)) / 1000);
+
+  const minutes = Math.floor(diffInSeconds / 60);
+  const hours = Math.floor(diffInSeconds / 3600);
+  const days = Math.floor(diffInSeconds / 86400);
+
+  if (hours < 1) return `${minutes} minut${minutes === 1 ? '' : 's'}`;
+  if (hours < 24) return `${hours} hora${hours === 1 ? '' : 's'}`;
+  return `${days} dia${days === 1 ? '' : 's'}`;
+};
+
 onMounted(getMultimedia);
 </script>
 
 <style scoped>
-ion-content {
-  --background: #f4f7f6;
-  padding-bottom: 60px; /* Espai per al botó flotant */
+.media-content {
+  --background: linear-gradient(135deg, #e0eafc, #cfdef3);
+  padding-bottom: 60px;
 }
 
-.upload-button {
+.btn-upload {
   position: fixed;
   bottom: 70px;
   right: 20px;
-  background-color: #3498db;
-  border-radius: 10px;
+  background-color: #4caf50;
+  border-radius: 50%;
   height: 60px;
   width: 60px;
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
   z-index: 10;
+  transition: transform 0.3s ease, background-color 0.3s ease;
 }
 
-.upload-button:hover {
-  background-color: #2980b9;
+.btn-upload:hover {
+  background-color: #388e3c;
+  transform: scale(1.1);
 }
 
-.upload-icon {
-  width: 30px;
-  height: 30px;
+.btn-upload-icon {
+  width: 28px;
+  height: 28px;
 }
 
-ion-grid {
-  padding: 10px;
+.media-grid {
+  padding: 20px;
+  gap: 20px;
 }
 
-ion-card {
-  border-radius: 12px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+.media-card {
+  border-radius: 16px;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
-  background-color: white;
+  background-color: #ffffff;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-ion-card-header {
-  background-color: #f9f9f9;
-  padding: 10px;
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
+.media-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.media-header {
+  background-color: #f0f4f8;
+  padding: 15px;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
   text-align: center;
 }
 
-ion-card-title {
-  font-size: 16px;
-  color: #333;
+.media-header img {
+  max-width: 100%;
+  border-radius: 12px;
 }
 
-ion-card-content {
+.media-footer {
   padding: 15px;
 }
 
-ion-item {
-  padding: 0;
+.media-user,
+.media-date {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-ion-label p {
-  margin: 5px 0;
-  font-size: 14px;
-  color: #666;
+.media-username {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
 }
 
-ion-card-footer {
-  padding: 10px;
+.media-date p {
+  margin: 0;
+  font-size: 13px;
+  color: #777;
 }
 
 ion-avatar img {
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
-}
-
-ion-card-footer ion-item {
-  display: flex;
-  align-items: center;
-}
-
-ion-card-footer ion-label {
-  margin-left: 10px;
-  font-size: 14px;
-  color: #333;
+  width: 45px;
+  height: 45px;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 767px) {
   ion-col {
-    padding: 5px;
+    padding: 10px;
   }
 }
 </style>
